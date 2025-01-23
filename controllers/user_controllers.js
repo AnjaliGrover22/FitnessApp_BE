@@ -16,7 +16,7 @@ const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 
 const createToken = (_id) => {
-  return jwt.sign({ _id }, process.env.API_secret);
+  return jwt.sign({ _id }, process.env.secret);
 };
 
 //login User
@@ -88,7 +88,18 @@ const signUpUser = async (req, res) => {
   }
 };
 
+// get all the users whose role are admin
+const getAllAdmins = async (req, res) => {
+  try {
+    const admins = await User.find({ role: "admin" });
+    res.status(200).json(admins); // Send the result back as JSON
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   signUpUser,
+  getAllAdmins,
 };
