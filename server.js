@@ -9,6 +9,8 @@ const UserRoutes = require("./routes/user_routes");
 connectDB();
 const cors = require("cors");
 
+const category = require("./routes/category_routes");
+
 app.use(cors());
 app.use(express.json());
 
@@ -18,7 +20,11 @@ app.get("/", (req, res) => {
   res.send("Welcome to Fitness App!");
 });
 
+
 app.use("/user", UserRoutes);
+
+app.use("category", category);
+
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`.bgGreen.black);
