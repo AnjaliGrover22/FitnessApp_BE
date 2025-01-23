@@ -88,8 +88,7 @@ const signUpUser = async (req, res) => {
   }
 };
 
-// get all the users whose role=admin
-
+// get all the users whose role are admin
 const getAllAdmins = async (req, res) => {
   try {
     const admins = await User.find({ role: "admin" });
