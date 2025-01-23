@@ -5,14 +5,11 @@ const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await Category.findById(id);
-    if (!category) {
-      return res.status(404).json({ message: "Category not found." });
-    }
 
-    if (category.listOfCourses && category.listOfCourses.length > 0) {
-      return res
-        .status(400)
-        .json({ message: "Category with courses can't be deleted." });
+    if (!category || category.listOfCourses.length > 0) {
+      return res.status(400).json({
+        message: "Category not found or contains courses and can't be deleted.",
+      });
     }
 
     await Category.findByIdAndDelete(id);
@@ -27,11 +24,11 @@ const deleteCategory = async (req, res) => {
 //Edit a category image
 const editCategoryImage = async (req, res) => {
   try {
-    const { categoryId } = req.params;
+    const { id } = req.params;
     const image = req.file ? req.file.path : null;
 
     const category = await Category.findByIdAndUpdate(
-      categoryId,
+      id,
       { image },
       { new: true }
     );
@@ -50,7 +47,7 @@ const editCategoryImage = async (req, res) => {
 //Edit category details
 const editCategoryDetails = async (req, res) => {
   try {
-    const { categoryId } = req.params;
+    const { id } = req.params;
     const { title, description, shortDescription } = req.body;
 
     const updatedFields = {};
@@ -64,11 +61,9 @@ const editCategoryDetails = async (req, res) => {
     if (Object.keys(updatedFields).length === 0) {
       return res.status(400).json({ message: "No fields to update." });
     }
-    const category = await Category.findByIdAndUpdate(
-      categoryId,
-      updatedFields,
-      { new: true }
-    );
+    const category = await Category.findByIdAndUpdate(id, updatedFields, {
+      new: true,
+    });
 
     if (!category) {
       return res.status(404).json({ message: "Category not found." });
