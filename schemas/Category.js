@@ -24,7 +24,7 @@ const CategorySchema = new Schema({
   listOfCourses: [
     {
       type: Schema.Types.ObjectId,
-      ref: "course",
+      ref: "Course",
     },
   ],
 });
