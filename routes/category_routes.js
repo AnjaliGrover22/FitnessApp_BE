@@ -16,6 +16,7 @@ app.get("/", getAllCategories);
 app.get("/:id", getOneCategory);
 
 app.use(checkAuthorization("admin"));
+
 app.post("/create", upload.single("image"), createCategory);
 app.delete("/delete/:id", deleteCategory);
 app.put("/edit_details/:id", editCategoryDetails);

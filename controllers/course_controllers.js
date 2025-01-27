@@ -5,12 +5,9 @@ const Category = require("../schemas/Category");
 const createCourse = async (req, res) => {
   try {
     const { title, description, intensity, equipment, category } = req.body;
-    const mainImage = req.file ? req.file.path : null;
-    const images =
-      req.files && req.files.images
-        ? req.files.images.map((file) => file.path)
-        : []; // handling multiple images
-    const video = req.files && req.files.video ? req.files.video[0].path : null;
+    const mainImage = req.files?.mainImage?.[0]?.path || null;
+    const images = req.files?.images?.map((file) => file.path) || [];
+    const video = req.files?.video?.[0]?.path || null;
 
     if (
       !title ||
@@ -81,14 +78,13 @@ const editCourseDetails = async (req, res) => {
 const editMainMedia = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedFields = {};
 
-    if (req.files && req.files.mainImage) {
-      updatedFields.mainImage = req.files.mainImage[0].path; // Update main image
-    }
-    if (req.files && req.files.video) {
-      updatedFields.video = req.files.video[0].path; // Update video
-    }
+    const mainImage = req.files?.mainImage?.[0]?.path || null;
+    const video = req.files?.video?.[0]?.path || null;
+
+    const updatedFields = {};
+    if (mainImage) updatedFields.mainImage = mainImage;
+    if (video) updatedFields.video = video;
 
     if (Object.keys(updatedFields).length === 0) {
       return res
