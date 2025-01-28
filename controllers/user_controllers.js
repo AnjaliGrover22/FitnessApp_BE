@@ -16,7 +16,7 @@ const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 
 const createToken = (_id) => {
-  return jwt.sign({ _id }, process.env.secret);
+  return jwt.sign({ _id }, process.env.SECRET);
 };
 
 //login User
@@ -33,7 +33,6 @@ const loginUser = async (req, res) => {
     res.status(200).json({
       email: user.email,
       firstName: user.firstName,
-      profileImage: user.profileImage,
       token,
       id: token._id,
     });
@@ -88,6 +87,50 @@ const signUpUser = async (req, res) => {
   }
 };
 
+//Create User
+const createUser = async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    res
+      .status(201)
+      .json({ message: "New user has been successfully created", user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Edit User Details
+const editUserDetails = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+//get the user with user id
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 // get all the users whose role are admin
 const getAllAdmins = async (req, res) => {
   try {
@@ -98,8 +141,38 @@ const getAllAdmins = async (req, res) => {
   }
 };
 
+// all users whose role is user
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" });
+    res.status(200).json(users); // Send the result back as JSON
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete User
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   signUpUser,
+  createUser,
+  editUserDetails,
   getAllAdmins,
+  getAllUsers,
+  getUserById,
+  deleteUser,
 };
