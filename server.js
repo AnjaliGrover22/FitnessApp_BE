@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", UserRoutes);
 
-app.use("category", categoryRoutes);
+app.use("/category", categoryRoutes);
 
 app.use("/course", courseRoutes);
 
