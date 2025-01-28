@@ -1,22 +1,26 @@
+// services/upload.js
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// configuring the cloudinary account using your credentials
+// Configure Cloudinary with your credentials
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
 
-// CloudinaryStorage helps us to create a storage option, which is required by multer to upload the file to a particular destination.
+// Set up Cloudinary storage for multer
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "app", // name for the folder in the cloud
-    allowedFormats: ["jpg", "png", "jpeg", "mp4"],
-    transformation: [{ width: 500, height: 500, crop: "limit" }],
+    folder: "app", // Folder name in Cloudinary
+    allowedFormats: ["jpg", "png", "jpeg", "mp4"], // Allowed file formats
+    transformation: [{ width: 500, height: 500, crop: "limit" }], // Image transformation
   },
 });
+
+// Initialize multer with the Cloudinary storage setup
 const upload = multer({ storage: storage });
-module.exports = upload;
+
+module.exports = upload; // Export the `upload` middleware

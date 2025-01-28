@@ -221,6 +221,38 @@ const removeFromFavorites = async (req, res) => {
   }
 };
 
+// Upload or Edit User Image (using Cloudinary)
+const editProfilePicture = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Ensure user exists before attempting to upload the image
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the file was uploaded correctly by multer
+    if (req.file && req.file.path) {
+      user.profileImage = req.file.path;
+      await User.save({ validateBeforeSave: false });
+
+      return res.status(200).json({
+        message: "Profile image uploaded successfully",
+        professional,
+      });
+    } else {
+      return res
+        .status(422)
+        .json({ message: "Invalid profile image or no file uploaded" });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   signUpUser,
@@ -232,4 +264,5 @@ module.exports = {
   deleteUser,
   addToFavorites,
   removeFromFavorites,
+  editProfilePicture,
 };

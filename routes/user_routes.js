@@ -1,4 +1,5 @@
 const express = require("express");
+const upload = require("../services/upload");
 const {
   loginUser,
   signUpUser,
@@ -10,6 +11,7 @@ const {
   deleteUser,
   addToFavorites,
   removeFromFavorites,
+  editProfilePicture,
 } = require("../controllers/user_controllers");
 
 const app = express.Router();
@@ -42,5 +44,8 @@ app.put("/:id/favorites", addToFavorites);
 
 //delete the favourite
 app.delete("/:id/favorites", removeFromFavorites);
+
+//edit profile pictures
+app.route("/:id/uploadImage").put(upload.single("picture"), editProfilePicture);
 
 module.exports = app;
