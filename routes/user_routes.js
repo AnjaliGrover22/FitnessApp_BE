@@ -8,6 +8,8 @@ const {
   getAllUsers,
   getUserById,
   deleteUser,
+  addToFavorites,
+  removeFromFavorites,
 } = require("../controllers/user_controllers");
 
 const app = express.Router();
@@ -34,5 +36,11 @@ app.delete("/delete/:id", deleteUser);
 
 // get User by Id
 app.get("/:id", getUserById);
+
+//get all added favourites
+app.put("/:id/favorites", addToFavorites);
+
+//delete the favourite
+app.delete("/:id/favorites", removeFromFavorites);
 
 module.exports = app;

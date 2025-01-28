@@ -166,6 +166,61 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Add to Favorites
+const addToFavorites = async (req, res) => {
+  const { id } = req.params; // User ID
+  const { favourite } = req.body; // Course ID to add
+
+  if (!mongoose.Types.ObjectId.isValid(favourite)) {
+    return res.status(400).json({ error: "Invalid Course ID" });
+  }
+
+  try {
+    // Ensure course exists (optional)
+    const courseExists = await Course.findById(favourite);
+    if (!courseExists) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    // Add to favourites
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $addToSet: { favourites: favourite } }, // Avoid duplicates
+      { new: true }
+    ).populate("favourites"); // Populate favourites with course details (optional)
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Server error, please try again later." });
+  }
+};
+
+// Remove from Favorites
+const removeFromFavorites = async (req, res) => {
+  const { id } = req.params;
+  const { favorite } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $pull: { favourites: favorite } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   signUpUser,
@@ -175,4 +230,6 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
+  addToFavorites,
+  removeFromFavorites,
 };
