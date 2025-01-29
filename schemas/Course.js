@@ -20,7 +20,11 @@ const CourseSchema = new Schema({
     type: String,
     required: false,
   },
-  intensity: { enum: ["basic", "intermediate", "advanced"] },
+  intensity: {
+    type: String,
+    enum: ["basic", "intermediate", "advanced"],
+    required: true,
+  },
   equipment: {
     type: Boolean, // Boolean for yes/no
     required: true,

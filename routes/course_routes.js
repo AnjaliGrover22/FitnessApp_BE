@@ -10,13 +10,14 @@ const {
   createCourse,
 } = require("../controllers/course_controllers");
 const checkAuthorization = require("../middlewares/checkAuthorization");
+const requireAuth = require("../middlewares/requireAuth");
 
 const app = express.Router();
 
 app.get("/", getAllCourse);
 app.get("/:id", getCourse);
 
-app.use(checkAuthorization("admin"));
+app.use(requireAuth("admin"));
 
 app.post(
   "/create",

@@ -11,6 +11,7 @@ const cors = require("cors");
 
 const categoryRoutes = require("./routes/category_routes");
 const courseRoutes = require("./routes/course_routes");
+const reviewRoutes = require("./routes/review_routes");
 
 app.use(cors());
 app.use(express.json());
@@ -26,6 +27,8 @@ app.use("/user", UserRoutes);
 app.use("/category", categoryRoutes);
 
 app.use("/course", courseRoutes);
+
+app.use("/review", reviewRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`.bgGreen.black);
