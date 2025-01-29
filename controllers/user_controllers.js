@@ -34,7 +34,7 @@ const loginUser = async (req, res) => {
       email: user.email,
       firstName: user.firstName,
       token,
-      id: token._id,
+      id: user._id,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -77,6 +77,7 @@ const signUpUser = async (req, res) => {
 
     // Return firstName along with email and token
     res.status(200).json({
+      id: user._id,
       email: user.email,
       firstName: user.firstName,
       profileImage: user.profileImage,
