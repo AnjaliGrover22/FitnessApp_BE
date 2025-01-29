@@ -235,11 +235,11 @@ const editProfilePicture = async (req, res) => {
     // Check if the file was uploaded correctly by multer
     if (req.file && req.file.path) {
       user.profileImage = req.file.path;
-      await User.save({ validateBeforeSave: false });
+      await user.save({ validateBeforeSave: false });
 
       return res.status(200).json({
         message: "Profile image uploaded successfully",
-        professional,
+        user,
       });
     } else {
       return res
