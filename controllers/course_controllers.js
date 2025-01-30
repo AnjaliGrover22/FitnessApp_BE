@@ -116,7 +116,39 @@ const editMainMedia = async (req, res) => {
 };
 
 //edit images of course gallery
-const updateImages = async (req, res) => {};
+const updateImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const uploadedImages = req.files?.map((file) => file.path);
+    const { imagesToRemove } = req.body;
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(400).json({ message: "Course not found." });
+    }
+
+    if (imagesToRemove && imagesToRemove.length > 0) {
+      course.images = course.images.filter(
+        (image) => !imagesToRemove.includes(image)
+      );
+    }
+
+    if (uploadedImages && uploadedImages.length > 0) {
+      course.images.push(...uploadedImages);
+    }
+
+    await course.save();
+    res.status(200).json({
+      message: "Course images successfully updated.",
+      course,
+      removed: imagesToRemove,
+      added: uploadedImages,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 
 //delete course (>-<)
 const deleteCourse = async (req, res) => {
@@ -265,4 +297,5 @@ module.exports = {
   updateCourseCategories,
   deleteCourse,
   createCourse,
+  updateImages,
 };

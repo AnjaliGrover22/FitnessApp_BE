@@ -8,8 +8,8 @@ const {
   updateCourseCategories,
   deleteCourse,
   createCourse,
+  updateImages,
 } = require("../controllers/course_controllers");
-const checkAuthorization = require("../middlewares/checkAuthorization");
 const requireAuth = require("../middlewares/requireAuth");
 
 const app = express.Router();
@@ -40,6 +40,7 @@ app.put(
 
 app.put("/edit_details/:id", editCourseDetails);
 app.put("/edit_category/:id", updateCourseCategories);
+app.put("/edit_images/:id", upload.array("images"), updateImages);
 app.delete("/delete/:id", deleteCourse);
 
 module.exports = app;
