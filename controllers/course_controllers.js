@@ -106,7 +106,7 @@ const editMainMedia = async (req, res) => {
   }
 };
 
-//delete course
+//delete course (>-<)
 const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,7 +124,7 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-//get course
+//get course (>-<)
 const getCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -145,7 +145,38 @@ const getCourse = async (req, res) => {
 //get all courses (filtered bny category or all)
 const getAllCourse = async (req, res) => {
   try {
-    const courses = await Course.find().populate("category favorized reviews");
+    const { intensity, category, equipment, minRating, maxRating } = req.query;
+    let filter = {};
+
+    //GET /course?intensity=advanced
+    if (intensity) {
+      filter.intensity = intensity;
+    }
+
+    //GET /courses?category=123,456
+    //$in to match an array of values
+    //category parameter will be passed from frontend as a String of category IDs, which we split at the coma and make into an array of Strings, each of one ID, eg: ?category=123,456,789, the result will be ['123', '456', '789']
+    if (category) {
+      filter.category = { $in: category.split(",") };
+    }
+
+    //GET /courses?equipment=true
+    //From frontend we receive either "true" or "false" as Strings, not boolean. To convert it we compare it to the String "true". If the frontend sends "true", then it will be true. If it sends "false", then it will be not match and hence false;
+    if (equipment !== undefined) {
+      filter.equipment = equipment === "true";
+    }
+
+    //GET /courses?minRating=3&maxRating=5
+    //$gte means "greater than or equal to", and $lte means "less than or equal to"
+    if (maxRating || minRating) {
+      filter.averageRating = {};
+      if (minRating) filter.averageRating.$gte = minRating;
+      if (maxRating) filter.averageRating.$lte = maxRating;
+    }
+
+    const courses = await Course.find(filter).populate(
+      "category favorized reviews"
+    );
 
     if (!courses.length) {
       return res.status(400).json({ message: "Courses not found." });
