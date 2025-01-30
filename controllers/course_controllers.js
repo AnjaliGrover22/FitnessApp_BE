@@ -1,7 +1,7 @@
 const Course = require("../schemas/Course");
 const Category = require("../schemas/Category");
 
-//create course
+//create course (>-<)
 const createCourse = async (req, res) => {
   try {
     const { title, description, intensity, equipment, category } = req.body;
@@ -31,6 +31,11 @@ const createCourse = async (req, res) => {
       video,
     });
 
+    await Category.updateMany(
+      { _id: { $in: category } },
+      { $addToSet: { listOfCourses: course._id } }
+    );
+
     res.status(201).json({ message: "Course successfully created.", course });
   } catch (error) {
     console.log(error);
@@ -38,7 +43,7 @@ const createCourse = async (req, res) => {
   }
 };
 
-//edit course details
+//edit course details (>-<)
 const editCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -63,6 +68,7 @@ const editCourseDetails = async (req, res) => {
 
     const updatedCourse = await Course.findByIdAndUpdate(id, updatedFields, {
       new: true,
+      runValidators: true,
     });
 
     res
@@ -74,13 +80,15 @@ const editCourseDetails = async (req, res) => {
   }
 };
 
-//edit MainImage and Video
+//edit MainImage and Video (>-<)
 const editMainMedia = async (req, res) => {
+  console.log("Controller is running...");
   try {
     const { id } = req.params;
 
     const mainImage = req.files?.mainImage?.[0]?.path || null;
-    const video = req.files?.video?.[0]?.path || null;
+    const video =
+      req.files?.video?.[0]?.secure_url || req.files?.video?.[0]?.path || null; // Try both secure_url and path
 
     const updatedFields = {};
     if (mainImage) updatedFields.mainImage = mainImage;
@@ -94,6 +102,7 @@ const editMainMedia = async (req, res) => {
 
     const course = await Course.findByIdAndUpdate(id, updatedFields, {
       new: true,
+      runValidators: true,
     });
     if (!course) {
       return res.status(404).json({ message: "Course not found." });
@@ -106,7 +115,42 @@ const editMainMedia = async (req, res) => {
   }
 };
 
-//delete course
+//edit images of course gallery
+const updateImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const uploadedImages = req.files?.map((file) => file.path);
+    const { imagesToRemove } = req.body;
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(400).json({ message: "Course not found." });
+    }
+
+    if (imagesToRemove && imagesToRemove.length > 0) {
+      course.images = course.images.filter(
+        (image) => !imagesToRemove.includes(image)
+      );
+    }
+
+    if (uploadedImages && uploadedImages.length > 0) {
+      course.images.push(...uploadedImages);
+    }
+
+    await course.save();
+    res.status(200).json({
+      message: "Course images successfully updated.",
+      course,
+      removed: imagesToRemove,
+      added: uploadedImages,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+//delete course (>-<)
 const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -124,7 +168,7 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-//get course
+//get course (>-<)
 const getCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -142,10 +186,41 @@ const getCourse = async (req, res) => {
   }
 };
 
-//get all courses (filtered bny category or all)
+//get all courses (filtered bny category or all) (>-<)
 const getAllCourse = async (req, res) => {
   try {
-    const courses = await Course.find().populate("category favorized reviews");
+    const { intensity, category, equipment, minRating, maxRating } = req.query;
+    let filter = {};
+
+    //GET /course?intensity=advanced
+    if (intensity) {
+      filter.intensity = intensity;
+    }
+
+    //GET /courses?category=123,456
+    //$in to match an array of values
+    //category parameter will be passed from frontend as a String of category IDs, which we split at the coma and make into an array of Strings, each of one ID, eg: ?category=123,456,789, the result will be ['123', '456', '789']
+    if (category) {
+      filter.category = { $in: category.split(",") };
+    }
+
+    //GET /courses?equipment=true
+    //From frontend we receive either "true" or "false" as Strings, not boolean. To convert it we compare it to the String "true". If the frontend sends "true", then it will be true. If it sends "false", then it will be not match and hence false;
+    if (equipment !== undefined) {
+      filter.equipment = equipment === "true";
+    }
+
+    //GET /courses?minRating=3&maxRating=5
+    //$gte means "greater than or equal to", and $lte means "less than or equal to"
+    if (maxRating || minRating) {
+      filter.averageRating = {};
+      if (minRating) filter.averageRating.$gte = minRating;
+      if (maxRating) filter.averageRating.$lte = maxRating;
+    }
+
+    const courses = await Course.find(filter).populate(
+      "category favorized reviews"
+    );
 
     if (!courses.length) {
       return res.status(400).json({ message: "Courses not found." });
@@ -157,7 +232,8 @@ const getAllCourse = async (req, res) => {
   }
 };
 
-//edit Categories of a course
+//edit Categories of a course (>-<)
+//send from frontend the categories you want it to be in
 const updateCourseCategories = async (req, res) => {
   try {
     const { id } = req.params;
@@ -175,9 +251,11 @@ const updateCourseCategories = async (req, res) => {
 
     const currentCategoryIds = course.category.map((catId) => catId.toString());
 
+    //categories not included in the existing categories of this course
     const categoriesToAdd = newCategoryIDs.filter(
       (id) => !currentCategoryIds.includes(id)
     );
+    //categories that are not in the new categories, but were in the current categories
     const categoriesToRemove = currentCategoryIds.filter(
       (id) => !newCategoryIDs.includes(id)
     );
@@ -219,4 +297,5 @@ module.exports = {
   updateCourseCategories,
   deleteCourse,
   createCourse,
+  updateImages,
 };
