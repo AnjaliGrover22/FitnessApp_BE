@@ -1,7 +1,7 @@
 const Course = require("../schemas/Course");
 const Category = require("../schemas/Category");
 
-//create course
+//create course (>-<)
 const createCourse = async (req, res) => {
   try {
     const { title, description, intensity, equipment, category } = req.body;
@@ -30,6 +30,11 @@ const createCourse = async (req, res) => {
       images,
       video,
     });
+
+    await Category.updateMany(
+      { _id: { $in: category } },
+      { $addToSet: { listOfCourses: course._id } }
+    );
 
     res.status(201).json({ message: "Course successfully created.", course });
   } catch (error) {
@@ -75,13 +80,15 @@ const editCourseDetails = async (req, res) => {
   }
 };
 
-//edit MainImage and Video
+//edit MainImage and Video (>-<)
 const editMainMedia = async (req, res) => {
+  console.log("Controller is running...");
   try {
     const { id } = req.params;
 
     const mainImage = req.files?.mainImage?.[0]?.path || null;
-    const video = req.files?.video?.[0]?.path || null;
+    const video =
+      req.files?.video?.[0]?.secure_url || req.files?.video?.[0]?.path || null; // Try both secure_url and path
 
     const updatedFields = {};
     if (mainImage) updatedFields.mainImage = mainImage;
@@ -107,6 +114,9 @@ const editMainMedia = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+//edit images of course gallery
+const updateImages = async (req, res) => {};
 
 //delete course (>-<)
 const deleteCourse = async (req, res) => {
@@ -190,7 +200,8 @@ const getAllCourse = async (req, res) => {
   }
 };
 
-//edit Categories of a course
+//edit Categories of a course (>-<)
+//send from frontend the categories you want it to be in
 const updateCourseCategories = async (req, res) => {
   try {
     const { id } = req.params;
@@ -208,9 +219,11 @@ const updateCourseCategories = async (req, res) => {
 
     const currentCategoryIds = course.category.map((catId) => catId.toString());
 
+    //categories not included in the existing categories of this course
     const categoriesToAdd = newCategoryIDs.filter(
       (id) => !currentCategoryIds.includes(id)
     );
+    //categories that are not in the new categories, but were in the current categories
     const categoriesToRemove = currentCategoryIds.filter(
       (id) => !newCategoryIDs.includes(id)
     );

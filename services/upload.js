@@ -14,9 +14,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "app", // Folder name in Cloudinary
-    allowedFormats: ["jpg", "png", "jpeg", "mp4", "webm"], // Allowed file formats
-    transformation: [{ width: 500, height: 500, crop: "limit" }], // Image transformation
+    //That will ensure Cloudinary can assign the resource_type automatically based on the uploaded file rather than it defaulting to "image"
+    resource_type: "auto",
+    folder: "app",
+    allowedFormats: ["jpg", "png", "jpeg", "mp4", "webm"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }],
   },
 });
 
