@@ -21,7 +21,7 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-//Edit a category image
+//Edit a category image (>-<)
 const editCategoryImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -44,7 +44,7 @@ const editCategoryImage = async (req, res) => {
   }
 };
 
-//Edit category details
+//Edit category details (>-<)
 const editCategoryDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -76,7 +76,7 @@ const editCategoryDetails = async (req, res) => {
   }
 };
 
-//Create a category
+//Create a category (>-<)
 const createCategory = async (req, res) => {
   try {
     const { title, shortDescription, description } = req.body;
@@ -99,7 +99,7 @@ const createCategory = async (req, res) => {
   }
 };
 
-//get category
+//get category (>-<)
 const getOneCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -116,7 +116,7 @@ const getOneCategory = async (req, res) => {
   }
 };
 
-//get all categories
+//get all categories (>-<)
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find().populate("listOfCourses");
