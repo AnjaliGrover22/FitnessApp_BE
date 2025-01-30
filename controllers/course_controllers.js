@@ -38,7 +38,7 @@ const createCourse = async (req, res) => {
   }
 };
 
-//edit course details
+//edit course details (>-<)
 const editCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -63,6 +63,7 @@ const editCourseDetails = async (req, res) => {
 
     const updatedCourse = await Course.findByIdAndUpdate(id, updatedFields, {
       new: true,
+      runValidators: true,
     });
 
     res
@@ -94,6 +95,7 @@ const editMainMedia = async (req, res) => {
 
     const course = await Course.findByIdAndUpdate(id, updatedFields, {
       new: true,
+      runValidators: true,
     });
     if (!course) {
       return res.status(404).json({ message: "Course not found." });
@@ -142,7 +144,7 @@ const getCourse = async (req, res) => {
   }
 };
 
-//get all courses (filtered bny category or all)
+//get all courses (filtered bny category or all) (>-<)
 const getAllCourse = async (req, res) => {
   try {
     const { intensity, category, equipment, minRating, maxRating } = req.query;
