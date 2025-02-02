@@ -2,11 +2,11 @@
 const Course = require("../schemas/Course");
 const Review = require("../schemas/Review");
 
+//create  (>-<)
 const createReview = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { content, rating, courseId } = req.body;
-
     const newReview = await Review.create({
       rating,
       content,
@@ -36,6 +36,7 @@ const createReview = async (req, res) => {
     const roundedRating = Math.min(Math.round(averageRating * 2) / 2, 5);
 
     course.averageRating = roundedRating;
+    course.reviews.push(newReview._id);
     await course.save();
 
     res.status(201).json({
@@ -49,13 +50,14 @@ const createReview = async (req, res) => {
   }
 };
 
-//delete
+//delete (>-<)
 const deleteReview = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { reviewId } = req.params;
 
-    const review = await Review.findById(reviewId);
+    const review = await Review.findById(reviewId).select("user course rating");
+
     if (!review) {
       return res.status(404).json({ message: "Review not found." });
     }
@@ -97,10 +99,10 @@ const deleteReview = async (req, res) => {
   }
 };
 
-//edit
+//edit (>-<)
 const updateReview = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { content, rating } = req.body;
     const { reviewId } = req.params;
 
@@ -159,10 +161,10 @@ const updateReview = async (req, res) => {
   }
 };
 
-//get your own reviews by user id
+//get your own reviews by user id (>-<)
 const getYourReviews = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const reviews = await Review.find({ user: userId }).populate("course user");
 
@@ -177,7 +179,7 @@ const getYourReviews = async (req, res) => {
   }
 };
 
-//get one review
+//get one review (>-<)
 const getOneReview = async (req, res) => {
   try {
     const { reviewId } = req.params;
@@ -194,13 +196,15 @@ const getOneReview = async (req, res) => {
   }
 };
 
-//get all reviews of one course
+//get all reviews of one course (>-<)
 const getAllForOneCourse = async (req, res) => {
   try {
-    const { courseId } = req.params;
-    const reviews = await Review.find({ course: courseId }).populate("course");
+    const courseId = req.params.id;
+    const reviews = await Review.find({ course: courseId }).populate(
+      "course user"
+    );
 
-    if (!reviews.length) {
+    if (reviews.length === 0) {
       return res
         .status(400)
         .json({ message: "No reviews found for this course." });
@@ -213,10 +217,10 @@ const getAllForOneCourse = async (req, res) => {
   }
 };
 
-//get all reviews of one course
+//get all reviews (>-<)
 const getAllReviews = async (req, res) => {
   try {
-    const reviews = await Review.find().populate("course");
+    const reviews = await Review.find().populate("course user");
 
     if (!reviews.length) {
       return res.status(400).json({ message: "No reviews found." });

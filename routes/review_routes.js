@@ -12,12 +12,12 @@ const requireAuth = require("../middlewares/requireAuth");
 const app = express.Router();
 
 app.get("/", requireAuth("admin"), getAllReviews);
+app.get("/your_reviews", requireAuth("user"), getYourReviews);
 app.get("/:reviewId", getOneReview);
-app.get("/your_reviews", getYourReviews);
 app.get("/course/:id", getAllForOneCourse);
 
 app.post("/create", requireAuth("user"), createReview);
-app.put("/edit/:reviewId", updateReview);
-app.delete("/delete/:reviewId", deleteReview);
+app.put("/edit/:reviewId", requireAuth("user"), updateReview);
+app.delete("/delete/:reviewId", requireAuth("user"), deleteReview);
 
 module.exports = app;
