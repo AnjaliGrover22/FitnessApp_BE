@@ -14,6 +14,7 @@ const mongoose = require("mongoose");
 const User = require("../schemas/User");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
+const Course = require("../schemas/Course");
 
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET);
@@ -194,26 +195,30 @@ const addToFavorites = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json(user);
+    const course = await Course.findByIdAndUpdate(
+      favourite,
+      { $addToSet: { favorized: id } }, // Avoid duplicates
+      { new: true }
+    );
+
+    res.status(200).json({ user, course });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: "Server error, please try again later.",
-        errorM: error.message,
-      });
+    res.status(500).json({
+      error: "Server error, please try again later.",
+      errorM: error.message,
+    });
   }
 };
 
 // Remove from Favorites
 const removeFromFavorites = async (req, res) => {
   const { id } = req.params;
-  const { favorite } = req.body;
+  const { favourite } = req.body;
 
   try {
     const user = await User.findByIdAndUpdate(
       id,
-      { $pull: { favourites: favorite } },
+      { $pull: { favourites: favourite } }, // Remove the course ID from favourites
       { new: true }
     );
 
@@ -221,7 +226,17 @@ const removeFromFavorites = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json(user);
+    const course = await Course.findByIdAndUpdate(
+      favourite,
+      { $pull: { favorized: id } },
+      { new: true }
+    );
+
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    res.status(200).json({ user, course }); //
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
